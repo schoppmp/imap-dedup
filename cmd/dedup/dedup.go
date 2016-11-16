@@ -55,7 +55,10 @@ func main() {
 		client, err = imap.DialTLS(url.Host, nil)
 	}
 	check(err)
-	defer client.Logout(1 * time.Second)
+	defer func() { // gracefully shutdown
+		_, err = client.Logout(1 * time.Second)
+		check(err)
+	}()
 	if starttls {
 		_, err := imap.Wait(client.StartTLS(nil))
 		check(err)
