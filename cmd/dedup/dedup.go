@@ -67,26 +67,23 @@ func main() {
 		username = url.User.Username()
 		password, _ = url.User.Password()
 	}
-	if username == "" || password == "" {
-		if username == "" {
-			scanner := bufio.NewScanner(os.Stdin)
-			fmt.Printf("Username: ")
-			if scanner.Scan() {
-				username = scanner.Text()
-			} else {
-				check(scanner.Err())
-			}
+	if username == "" {
+		scanner := bufio.NewScanner(os.Stdin)
+		fmt.Printf("Username: ")
+		if scanner.Scan() {
+			username = scanner.Text()
+		} else {
+			check(scanner.Err())
 		}
-		if password == "" {
-			fmt.Printf("Password: ")
-			pass_bytes, err := gopass.GetPasswd()
-			check(err)
-			password = string(pass_bytes)
-		}
+	}
+	if password == "" {
+		fmt.Printf("Password: ")
+		pass_bytes, err := gopass.GetPasswd()
+		check(err)
+		password = string(pass_bytes)
 	}
 	_, err = client.Login(username, password)
 	check(err)
-	println(url.Path)
 	cmd, err := client.Select(url.Path[1:], true)
 	check(err)
 	for _, resp := range cmd.Data {
