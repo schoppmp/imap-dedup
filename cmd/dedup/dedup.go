@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/howeyc/gopass"
@@ -38,14 +37,6 @@ func main() {
 	}
 	url, err := url.Parse("imap://" + flag.Arg(0))
 	check(err)
-	// set default port
-	if strings.LastIndex(url.Host, ":") < 0 {
-		if starttls {
-			url.Host += ":143"
-		} else {
-			url.Host += ":993"
-		}
-	}
 
 	// establish a secure connection with the server
 	var client *imap.Client
