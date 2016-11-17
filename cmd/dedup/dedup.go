@@ -13,21 +13,22 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
+// Convenience function for error handling
 func check(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func usage() {
-	fmt.Fprintf(os.Stderr, "Usage: %s [options] [user[:password]@]hostname[:port]/folder\nOptions:\n", os.Args[0])
-	flag.PrintDefaults()
-}
-
 func main() {
 	var err error
 	var starttls bool
-	flag.Usage = usage
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr,
+			"Usage: %s [options] [user[:password]@]hostname[:port]/folder\nOptions:\n",
+			os.Args[0])
+		flag.PrintDefaults()
+	}
 	flag.BoolVar(&starttls, "starttls", false, "Use STARTTLS instead of SSL/TLS")
 
 	flag.Parse()
