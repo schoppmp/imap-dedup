@@ -61,9 +61,10 @@ func main() {
 		username = url.User.Username()
 		password, _ = url.User.Password()
 	}
+	// read username and/or password from STDIN if not given in the URL
 	if username == "" {
 		scanner := bufio.NewScanner(os.Stdin)
-		fmt.Printf("Username: ")
+		fmt.Print("Username: ")
 		if scanner.Scan() {
 			username = scanner.Text()
 		} else {
@@ -71,16 +72,34 @@ func main() {
 		}
 	}
 	if password == "" {
-		fmt.Printf("Password: ")
+		fmt.Print("Password: ")
 		pass_bytes, err := gopass.GetPasswd()
 		check(err)
 		password = string(pass_bytes)
 	}
 	_, err = client.Login(username, password)
 	check(err)
-	cmd, err := client.Select(url.Path[1:], true)
+	_, err = client.Select(url.Path[1:], true)
 	check(err)
+
+	// get the envelopes of all messages
+	seqSet, err := imap.NewSeqSet("1:*")
+	check(err)
+	cmd, err := imap.Wait(client.UIDFetch(seqSet, "BODY[HEADER]"))
+	check(err)
+	envelopes := map[string]uint32{}
+	toDelete := []uint32{}
 	for _, resp := range cmd.Data {
-		println(resp.String())
+		info := resp.MessageInfo()
+		key := fmt.Sprintf("%s", info.Attrs["BODY[HEADER]"])
+		if _, ok := envelopes[key]; ok {
+			// we already have this message
+			toDelete = append(toDelete, info.UID)
+		} else {
+			envelopes[key] = info.UID
+		}
 	}
+	fmt.Println("Number of emails:", len(cmd.Data))
+	fmt.Println("Emails kept:", len(envelopes))
+	fmt.Println("Emails to delete:", len(toDelete))
 }
