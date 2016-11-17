@@ -73,7 +73,7 @@ func main() {
 		check(err)
 	}()
 	if starttls {
-		_, err := imap.Wait(client.StartTLS(nil))
+		_, err = imap.Wait(client.StartTLS(nil))
 		check(err)
 	}
 
@@ -95,7 +95,8 @@ func main() {
 	if password == "" {
 		fmt.Print("Password: ")
 		if terminal.IsTerminal(int(os.Stdin.Fd())) { // read password without echo
-			pass_bytes, err := terminal.ReadPassword(int(os.Stdin.Fd()))
+			var pass_bytes []byte
+			pass_bytes, err = terminal.ReadPassword(int(os.Stdin.Fd()))
 			check(err)
 			password = string(pass_bytes)
 			fmt.Println()
